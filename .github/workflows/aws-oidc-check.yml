@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Show the subject claim sent by GitHub
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const token = await core.getIDToken('sts.amazonaws.com');
@@ -25,7 +25,7 @@ jobs:
             core.info(`sub: ${claims.sub}`);
 
       - name: Assume the plan role
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
