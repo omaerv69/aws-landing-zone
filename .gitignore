@@ -1,0 +1,32 @@
+# Terraform working directories and local state
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+crash.log
+crash.*.log
+
+# Plans can contain sensitive values
+*.tfplan
+tfplan
+
+# Variable files and backend settings stay local (examples are committed)
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+backend.hcl
+
+# Override files are meant for local experiments
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Note: .terraform.lock.hcl IS committed, it pins provider versions and hashes.
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db

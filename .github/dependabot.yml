@@ -1,0 +1,17 @@
+---
+# Keeps GitHub Actions and Terraform providers up to date through weekly
+# pull requests, which CI checks like any other change.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  - package-ecosystem: terraform
+    directory: /bootstrap
+    schedule:
+      interval: weekly

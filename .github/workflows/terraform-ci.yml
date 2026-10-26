@@ -1,0 +1,84 @@
+---
+# Static checks on every pull request and on main. No AWS credentials needed.
+name: terraform-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fmt:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Read the pinned Terraform version
+        id: tf
+        run: echo "version=$(cat .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ steps.tf.outputs.version }}
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive -diff
+
+  validate:
+    name: Validate ${{ matrix.root }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        root: [bootstrap]  # every root module is added here
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Read the pinned Terraform version
+        id: tf
+        run: echo "version=$(cat .terraform-version)" >> "$GITHUB_OUTPUT"
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ steps.tf.outputs.version }}
+
+      - name: Init without backend
+        run: terraform -chdir=${{ matrix.root }} init -backend=false -input=false
+
+      - name: Validate
+        run: terraform -chdir=${{ matrix.root }} validate
+
+  tflint:
+    name: TFLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: terraform-linters/setup-tflint@v6
+
+      - name: Install plugins
+        run: tflint --init --config "$GITHUB_WORKSPACE/.tflint.hcl"
+
+      - name: Lint
+        run: tflint --recursive --config "$GITHUB_WORKSPACE/.tflint.hcl" --format compact
+
+  checkov:
+    name: Checkov
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Scan Terraform and workflows
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          framework: terraform,github_actions
+          quiet: true

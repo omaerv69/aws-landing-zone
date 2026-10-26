@@ -1,0 +1,13 @@
+# Rename this file to backend.tf after the first apply, then run:
+#   terraform init -migrate-state -backend-config="bucket=<state_bucket output>"
+#
+# The bucket name contains the account ID, so it stays out of Git on purpose
+# (partial backend configuration). Change the region if home_region changes.
+terraform {
+  backend "s3" {
+    key          = "bootstrap/terraform.tfstate"
+    region       = "eu-west-3"
+    encrypt      = true
+    use_lockfile = true
+  }
+}

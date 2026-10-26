@@ -1,0 +1,34 @@
+---
+# Manual end-to-end check of the OIDC trust between GitHub Actions and AWS.
+# Run it from the Actions tab once the bootstrap stack is applied and the
+# repository variables are set.
+name: aws-oidc-check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write  # lets the job request an OIDC token from GitHub
+
+jobs:
+  whoami:
+    name: Assume the plan role
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show the subject claim sent by GitHub
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const token = await core.getIDToken('sts.amazonaws.com');
+            const claims = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString());
+            core.info(`sub: ${claims.sub}`);
+
+      - name: Assume the plan role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Show the assumed identity
+        run: aws sts get-caller-identity

@@ -1,0 +1,24 @@
+---
+# Single source of truth for one landing zone deployment.
+# Adapting the landing zone to a new context starts in this file.
+
+project: lz  # short prefix used in resource names
+owner: omar  # value of the Owner tag on every resource
+
+home_region: eu-west-3  # Paris
+allowed_regions:  # enforced by a service control policy from phase 1
+  - eu-west-3
+  - us-east-1  # global services: IAM, CloudFront certificates, billing
+
+github:
+  owner: CHANGE_ME  # GitHub user or organization, exact case
+  owner_id: 123744250  # numeric IDs: see "Prerequisites" in bootstrap/README.md
+  repository: aws-landing-zone
+  repository_id: 1434927480
+  # Repositories created after 2026-07-15 always get immutable subject
+  # claims (names plus IDs). Set to false only for an older repository.
+  immutable_subject: true
+  apply_environment: production  # environment allowed to assume the apply role
+
+# Phase 1 adds the organization layout here:
+# organizational units, accounts and their email addresses.
